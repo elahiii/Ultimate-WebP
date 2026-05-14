@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Image → WebP Converter",
-  "version": "1.0.0",
-  "description": "Batch convert PNG, JPG, GIF, BMP, TIFF, SVG images to high-quality WebP. Full resolution, transparency preserved.",
+  "name": "Ultimate WebP Compressor",
+  "version": "2.0.0",
+  "description": "Premium image compressor. Convert PNG, JPG, GIF, BMP, TIFF, SVG to high-efficiency WebP with maximum compression and zero visual quality loss.",
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Image to WebP Converter"
+    "default_title": "Ultimate WebP Compressor"
   }
 }
