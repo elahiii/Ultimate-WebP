@@ -1,86 +1,5 @@
 'use strict';
 
-// ─── Dependency-free ZIP builder ──────────────────────────────────────────────
-
-const CRC_TABLE = (() => {
-  const t = new Uint32Array(256);
-  for (let i = 0; i < 256; i++) {
-    let c = i;
-    for (let j = 0; j < 8; j++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-    t[i] = c;
-  }
-  return t;
-})();
-
-function crc32(buf) {
-  let crc = 0xFFFFFFFF;
-  for (let i = 0; i < buf.length; i++) crc = CRC_TABLE[(crc ^ buf[i]) & 0xFF] ^ (crc >>> 8);
-  return (crc ^ 0xFFFFFFFF) >>> 0;
-}
-
-function buildZip(entries) {
-  // entries: [{ name: string, data: Uint8Array }]
-  const enc = new TextEncoder();
-  const locals = [];
-  const centrals = [];
-  let offset = 0;
-
-  for (const { name, data } of entries) {
-    const nameBytes = enc.encode(name);
-    const crc = crc32(data);
-    const size = data.length;
-
-    // Local file header (30 bytes + filename)
-    const lh = new Uint8Array(30 + nameBytes.length);
-    const lv = new DataView(lh.buffer);
-    lv.setUint32(0, 0x04034b50, true);  // signature
-    lv.setUint16(4, 20, true);           // version needed
-    lv.setUint16(6, 0, true);            // flags
-    lv.setUint16(8, 0, true);            // compression (stored = no compression)
-    lv.setUint32(14, crc, true);
-    lv.setUint32(18, size, true);
-    lv.setUint32(22, size, true);
-    lv.setUint16(26, nameBytes.length, true);
-    lh.set(nameBytes, 30);
-    locals.push(lh, data);
-
-    // Central directory entry (46 bytes + filename)
-    const cd = new Uint8Array(46 + nameBytes.length);
-    const cv = new DataView(cd.buffer);
-    cv.setUint32(0, 0x02014b50, true);
-    cv.setUint16(4, 20, true);
-    cv.setUint16(6, 20, true);
-    cv.setUint32(16, crc, true);
-    cv.setUint32(20, size, true);
-    cv.setUint32(24, size, true);
-    cv.setUint16(28, nameBytes.length, true);
-    cv.setUint32(42, offset, true);      // offset of local header
-    cd.set(nameBytes, 46);
-    centrals.push(cd);
-
-    offset += 30 + nameBytes.length + size;
-  }
-
-  const cdStart = offset;
-  const cdSize = centrals.reduce((s, c) => s + c.length, 0);
-
-  // End of central directory record
-  const eocd = new Uint8Array(22);
-  const ev = new DataView(eocd.buffer);
-  ev.setUint32(0, 0x06054b50, true);
-  ev.setUint16(8, entries.length, true);
-  ev.setUint16(10, entries.length, true);
-  ev.setUint32(12, cdSize, true);
-  ev.setUint32(16, cdStart, true);
-
-  const all = [...locals, ...centrals, eocd];
-  const total = all.reduce((s, a) => s + a.length, 0);
-  const out = new Uint8Array(total);
-  let pos = 0;
-  for (const part of all) { out.set(part, pos); pos += part.length; }
-  return new Blob([out], { type: 'application/zip' });
-}
-
 // ─── State ────────────────────────────────────────────────────────────────────
 
 // entry shape: { id, file, status: 'pending'|'converting'|'done'|'error', blob, origSize, webpSize, errorMsg }
@@ -142,7 +61,7 @@ convertBtn.addEventListener('click', async () => {
     renderItem(entry);
 
     try {
-      entry.blob = await convertToWebP(entry.file, 1.0);
+      entry.blob = await convertToWebP(entry.file, 0.80);
       entry.webpSize = entry.blob.size;
       entry.status = 'done';
     } catch (err) {
@@ -155,10 +74,10 @@ convertBtn.addEventListener('click', async () => {
   updateHeader();
 
   const done = files.filter(f => f.status === 'done' && f.blob);
-  if (done.length) await packageAndDownload(done);
+  if (done.length) await downloadAll(done);
 
   convertBtn.disabled = false;
-  convertBtn.textContent = 'Convert & Download ZIP';
+  convertBtn.textContent = 'Convert & Download';
 });
 
 // ─── Core conversion (canvas → WebP) ─────────────────────────────────────────
@@ -193,18 +112,14 @@ function convertToWebP(file, quality) {
   });
 }
 
-// ─── Package & auto-download ZIP ─────────────────────────────────────────────
+// ─── Individual downloads ─────────────────────────────────────────────────────
 
-async function packageAndDownload(done) {
-  convertBtn.textContent = '⏳ Packaging ZIP…';
-
-  const entries = await Promise.all(done.map(async entry => ({
-    name: withoutExt(entry.file.name) + '.webp',
-    data: new Uint8Array(await entry.blob.arrayBuffer()),
-  })));
-
-  const zip = buildZip(entries);
-  triggerDownload(zip, 'webp-images.zip');
+async function downloadAll(done) {
+  convertBtn.textContent = '⏳ Downloading…';
+  for (let i = 0; i < done.length; i++) {
+    triggerDownload(done[i].blob, withoutExt(done[i].file.name) + '.webp');
+    if (i < done.length - 1) await new Promise(r => setTimeout(r, 300));
+  }
 }
 
 // ─── Clear ────────────────────────────────────────────────────────────────────
@@ -214,7 +129,7 @@ clearBtn.addEventListener('click', () => {
   fileListEl.innerHTML = '';
   fileListSection.hidden = true;
   convertBtn.disabled = false;
-  convertBtn.textContent = 'Convert & Download ZIP';
+  convertBtn.textContent = 'Convert & Download';
 });
 
 // ─── Download helper ──────────────────────────────────────────────────────────
