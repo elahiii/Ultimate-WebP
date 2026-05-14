@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Image to WebP</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Image → WebP</h1>
+      <span class="subtitle">Batch Converter</span>
+    </header>
+
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-icon">🖼</div>
+      <p>Drop images here or <button class="link-btn" id="selectBtn">browse files</button></p>
+      <p class="hint">PNG · JPG · GIF · BMP · TIFF · SVG · WebP</p>
+      <input type="file" id="fileInput" multiple accept="image/*" hidden>
+    </div>
+
+    <div class="file-list-section" id="fileListSection" hidden>
+      <div class="file-list-header">
+        <span id="fileCount">0 files</span>
+        <div class="actions">
+          <button id="convertBtn" class="btn btn-primary">Convert &amp; Download ZIP</button>
+        </div>
+      </div>
+      <ul class="file-list" id="fileList"></ul>
+      <button id="clearBtn" class="btn btn-ghost">Clear All</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

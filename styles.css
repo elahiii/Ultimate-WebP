@@ -1,0 +1,208 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  width: 440px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  background: #0d0d0d;
+  color: #e8e8e8;
+  min-height: 200px;
+  max-height: 600px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a #0d0d0d;
+}
+
+body::-webkit-scrollbar { width: 5px; }
+body::-webkit-scrollbar-track { background: #0d0d0d; }
+body::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
+
+.app {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Header */
+header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #1e1e1e;
+}
+h1 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.subtitle {
+  font-size: 10px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Drop zone */
+.drop-zone {
+  border: 1.5px dashed #2a2a2a;
+  border-radius: 10px;
+  padding: 22px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: #111;
+  user-select: none;
+}
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: #6366f1;
+  background: #13132a;
+}
+.drop-zone.drag-over {
+  border-style: solid;
+}
+.drop-icon {
+  font-size: 26px;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+.drop-zone p {
+  color: #999;
+  line-height: 1.5;
+}
+.hint {
+  font-size: 11px;
+  color: #444;
+  margin-top: 4px;
+}
+.link-btn {
+  background: none;
+  border: none;
+  color: #6366f1;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.link-btn:hover { color: #818cf8; }
+
+/* File list section */
+.file-list-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.file-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.file-list-header > span {
+  color: #666;
+  font-size: 12px;
+}
+.actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Buttons */
+.btn {
+  padding: 6px 13px;
+  border-radius: 6px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s, transform 0.1s;
+  line-height: 1;
+}
+.btn:active:not(:disabled) { transform: scale(0.96); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary { background: #6366f1; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #4f46e5; }
+
+.btn-success { background: #16a34a; color: #fff; }
+.btn-success:hover:not(:disabled) { background: #15803d; }
+
+.btn-ghost {
+  background: transparent;
+  color: #555;
+  border: 1px solid #222;
+  font-size: 11px;
+  padding: 4px 10px;
+  align-self: flex-start;
+}
+.btn-ghost:hover:not(:disabled) { color: #888; border-color: #444; }
+
+/* File list */
+.file-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a transparent;
+}
+.file-list::-webkit-scrollbar { width: 4px; }
+.file-list::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 4px; }
+
+/* File item */
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  background: #131313;
+  border-radius: 7px;
+  border: 1px solid #1d1d1d;
+  transition: border-color 0.15s;
+}
+.file-item.done  { border-color: #14291a; }
+.file-item.error { border-color: #2a1414; }
+
+.file-status {
+  font-size: 13px;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.file-status.pending    { color: #444; }
+.file-status.converting { color: #f59e0b; display: inline-block; animation: spin 0.8s linear infinite; }
+.file-status.done       { color: #22c55e; }
+.file-status.error      { color: #ef4444; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.file-info {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.file-name {
+  color: #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+.file-size {
+  color: #555;
+  font-size: 11px;
+}
+.savings-pos { color: #22c55e; font-weight: 600; }
+.savings-neg { color: #f59e0b; font-weight: 600; }
+.error-text  { color: #ef4444; }
+

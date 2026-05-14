@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Image → WebP Converter",
+  "version": "1.0.0",
+  "description": "Batch convert PNG, JPG, GIF, BMP, TIFF, SVG images to high-quality WebP. Full resolution, transparency preserved.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Image to WebP Converter"
+  }
+}
